@@ -32,5 +32,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/album/{id}/fotos', [FotoController::class, 'index'])->name('album.fotos');
         // Guardar nuevo álbum
     Route::post('/album/crear', [AlbumController::class, 'store'])->name('album.store');
+
+    // Guardar nueva foto (Carga de imágenes)
+    Route::post('/foto/subir', [FotoController::class, 'store'])->name('foto.store');
     
 });
