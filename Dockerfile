@@ -1,4 +1,12 @@
-# Usar la imagen oficial de PHP con Apache
+# --- Etapa 1: Compilar recursos del Frontend (Bootstrap, CSS, JS) ---
+FROM node:20 AS frontend-builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+# --- Etapa 2: Servidor PHP Apache de Producción ---
 FROM php:8.3-apache
 
 # Instalar dependencias del sistema necesarias
@@ -29,6 +37,9 @@ WORKDIR /var/www/html
 
 # Copiar los archivos del proyecto al contenedor
 COPY . .
+
+# Copiar los recursos compilados (Vite assets) desde la Etapa 1
+COPY --from=frontend-builder /app/public/build /var/www/html/public/build
 
 # Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
