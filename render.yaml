@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: lab-13-gestor-imagenes  # Puedes cambiar este nombre por el que desees
+    env: php
+    plan: free
+    buildCommand: |
+      composer install --no-dev --optimize-autoloader
+      npm install && npm run build
+      touch database/database.sqlite
+      php artisan migrate --force
+      php artisan db:seed --force
+    startCommand: vendor/bin/heroku-php-apache2 public/
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        sync: false  # Se generará una clave aleatoria en el panel de Render
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: DB_DATABASE
+        value: database/database.sqlite
