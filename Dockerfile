@@ -34,12 +34,13 @@ COPY . .
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader
 
-# Crear la carpeta de imágenes si no existe y dar permisos necesarios a las carpetas de Laravel
-RUN mkdir -p /var/www/html/public/img/fotos \
-    && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/public/img/fotos
+# Crear directorios y base de datos SQLite con los permisos de usuario www-data correctos
+RUN mkdir -p /var/www/html/database /var/www/html/public/img/fotos \
+    && touch /var/www/html/database/database.sqlite \
+    && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/public/img/fotos /var/www/html/database
 
 # Exponer el puerto 80
 EXPOSE 80
 
-# Comando para crear la base de datos SQLite, migrar, sembrar los datos y arrancar Apache
-CMD touch database/database.sqlite && php artisan migrate --force && php artisan db:seed --force && apache2-foreground
+# Ejecutar las migraciones y sembrar como usuario www-data para evitar conflictos de permisos, luego iniciar Apache
+CMD su -s /bin/bash -c "php artisan migrate --force && php artisan db:seed --force" www-data && apache2-foreground
